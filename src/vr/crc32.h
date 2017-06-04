@@ -5,10 +5,7 @@
 //----------------------------------------------------------------------------
 namespace vr
 {
-
-extern uint32_t
-crc32_reference (uint8_t const * buf, int32_t len, uint32_t crc);
-
+//............................................................................
 //............................................................................
 namespace impl
 {
@@ -83,35 +80,54 @@ constexpr uint32_t const g_crctable [256] =
 
 } // end of 'impl'
 //............................................................................
+//............................................................................
+/**
+ * if invoked with 'src' of all-ones and after flipping all bits of the result,
+ * this would be a reference implementation of iSCSI checksum; we don't need to
+ * replicate iSCSI details fully for the purposes of string hashing -- we only
+ * need to match the calculation as done by SSE 4.2 crc32c instructions.
+ *
+ * @note this function is for testing the correctness of the "fast" @ref crc32()
+ * version; it is "slow" in the sense of consuming input one byte at a time and
+ * not using the hardware assists of crc32c ops
+ *
+ * @param buf input data
+ * @param len size (in bytes) of data in 'buf'
+ * @param crc CRC32 seed value [may not be zero]
+ *
+ * @return CRC32 value obtained by starting with 'src' and using iSCSI polynomial
+ *         to consume all 'buf' bytes
+ */
+extern uint32_t
+crc32_reference (uint8_t const * buf, int32_t len, uint32_t crc);
 
+//............................................................................
+/**
+ * constexpr equivalent of <tt>crc32_reference()</tt> used by '_hash' user-defined string literal
+ */
 constexpr uint32_t
-crc32_constexpr (char const * const str, int32_t const len, uint32_t const crc, int32_t const start = 0)
+crc32_constexpr (char const * const str, int32_t const len, uint32_t const crc, int32_t const pos = 0)
 {
-    return (start == len ? crc : crc32_constexpr (str, len, (crc >> 8) ^ impl::g_crctable [(crc ^ str [start]) & 0xFF], start + 1));
-}
-
-constexpr uint32_t
-operator "" _hash (char const * str, size_t const len)
-{
-    return crc32_constexpr (str, len, 1);
+    return (pos == len ? crc : crc32_constexpr (str, len, (crc >> 8) ^ impl::g_crctable [(crc ^ str [pos]) & 0xFF], pos + 1));
 }
 //............................................................................
-
+/**
+ * a faster equivalent of <tt>crc32_reference(buf, len, src)</tt> using SSE 4.2 crc32c ops
+ */
 inline uint32_t
 crc32 (uint8_t const * buf, int32_t len, uint32_t crc)
 {
-    while (len >= 8)
+    while (VR_UNLIKELY (len >= 8)) // more perf tweaking can be done here, but at least tell the compiler we expect short strings
     {
         crc = crc32 (crc, * reinterpret_cast<uint64_t const *> (buf));
         buf += 8; len -= 8;
     }
 
-    // epilogue:
-
-    switch (len)
+    switch (len) // consume remaining bytes:
     {
         case 7:
             crc = crc32 (crc, * buf); ++ buf;
+            /* no break */
         case 6:
             crc = crc32 (crc, * reinterpret_cast<uint32_t const *> (buf));
             crc = crc32 (crc, * reinterpret_cast<uint16_t const *> (buf + 4));
@@ -119,18 +135,21 @@ crc32 (uint8_t const * buf, int32_t len, uint32_t crc)
 
         case 5:
             crc = crc32 (crc, * buf); ++ buf;
+            /* no break */
         case 4:
             crc = crc32 (crc, * reinterpret_cast<uint32_t const *> (buf));
             return crc;
 
         case 3:
             crc = crc32 (crc, * buf); ++ buf;
+            /* no break */
         case 2:
             crc = crc32 (crc, * reinterpret_cast<uint16_t const *> (buf));
             return crc;
 
         case 1:
             crc = crc32 (crc, * buf);
+            /* no break */
         default/* case 0 */: return crc;
 
     } // end of switch

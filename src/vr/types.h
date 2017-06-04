@@ -8,6 +8,7 @@ namespace vr
 {
 
 using std::size_t;
+
 using std::uint64_t;
 using std::uint32_t;
 using std::uint16_t;
