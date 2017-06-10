@@ -82,7 +82,7 @@ constexpr uint32_t const g_crctable [256] =
 //............................................................................
 //............................................................................
 /**
- * if invoked with 'src' of all-ones and after flipping all bits of the result,
+ * if invoked with 'crc' seed of all-ones and after flipping all bits of the result,
  * this would be a reference implementation of iSCSI checksum; we don't need to
  * replicate iSCSI details fully for the purposes of string hashing -- we only
  * need to match the calculation as done by SSE 4.2 crc32c instructions.
@@ -95,7 +95,7 @@ constexpr uint32_t const g_crctable [256] =
  * @param len size (in bytes) of data in 'buf'
  * @param crc CRC32 seed value [may not be zero]
  *
- * @return CRC32 value obtained by starting with 'src' and using iSCSI polynomial
+ * @return CRC32 value obtained by starting with 'crc' and using iSCSI polynomial
  *         to consume all 'buf' bytes
  */
 extern uint32_t
@@ -112,7 +112,7 @@ crc32_constexpr (char const * const str, int32_t const len, uint32_t const crc, 
 }
 //............................................................................
 /**
- * a faster equivalent of <tt>crc32_reference(buf, len, src)</tt> using SSE 4.2 crc32c ops
+ * a faster equivalent of <tt>crc32_reference(buf, len, crc)</tt> using SSE 4.2 crc32c ops
  */
 inline uint32_t
 crc32 (uint8_t const * buf, int32_t len, uint32_t crc)

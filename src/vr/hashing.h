@@ -8,17 +8,9 @@
 //----------------------------------------------------------------------------
 namespace vr
 {
-//............................................................................
-//............................................................................
-namespace
-{
-/**
- * CRC32 uses '-1' but we'd like to avoid a large literal in the emitted asm
- */
-constexpr uint32_t src_hash_seed ()     { return 1; }
 
-} // end of anonymous
-//............................................................................
+constexpr uint32_t crc32_hash_seed ()     { return -1; }
+
 //............................................................................
 /**
  * a user-defined string literal for static string hashing, to be used together
@@ -38,7 +30,7 @@ constexpr uint32_t src_hash_seed ()     { return 1; }
 constexpr uint32_t
 operator "" _hash (char const * const str, size_t const len)
 {
-    return crc32_constexpr (str, len, src_hash_seed ());
+    return crc32_constexpr (str, len, crc32_hash_seed ());
 }
 //............................................................................
 /**
@@ -50,7 +42,7 @@ operator "" _hash (char const * const str, size_t const len)
 inline uint32_t
 str_hash (char const * const str, int32_t const len)
 {
-    return crc32 (reinterpret_cast<uint8_t const *> (str), len, src_hash_seed ());
+    return crc32 (reinterpret_cast<uint8_t const *> (str), len, crc32_hash_seed ());
 }
 
 /**

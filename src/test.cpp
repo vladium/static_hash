@@ -29,8 +29,8 @@ test_crc32 ()
 
             // check that the reference and "fast" impls compute the same value for this string:
 
-            auto const h_ref    = crc32_reference (buf.get (), len, src_hash_seed ());
-            auto const h_fast   = crc32 (buf.get (), len, src_hash_seed ());
+            auto const h_ref    = crc32_reference (buf.get (), len, crc32_hash_seed ());
+            auto const h_fast   = crc32 (buf.get (), len, crc32_hash_seed ());
 
             if (h_ref != h_fast)
                 return false;

@@ -31,7 +31,7 @@ main (int32_t ac, char * av [])
 
     } // end of switch
 
-    std::cout << '\'' << av [1] << "' hashed to " << std::hex << h << std::endl;
+    std::cout << '\'' << av [1] << "' hashed to 0x" << std::hex << h << std::endl;
 
     return 0;
 }
