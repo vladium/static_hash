@@ -119,36 +119,36 @@ crc32 (uint8_t const * buf, int32_t len, uint32_t crc)
 {
     while (VR_UNLIKELY (len >= 8)) // more perf tweaking can be done here, but at least tell the compiler we expect short strings
     {
-        crc = crc32 (crc, * reinterpret_cast<uint64_t const *> (buf));
+        crc = i_crc32 (crc, * reinterpret_cast<uint64_t const *> (buf));
         buf += 8; len -= 8;
     }
 
     switch (len) // consume remaining bytes:
     {
         case 7:
-            crc = crc32 (crc, * buf); ++ buf;
+            crc = i_crc32 (crc, * buf); ++ buf;
             /* no break */
         case 6:
-            crc = crc32 (crc, * reinterpret_cast<uint32_t const *> (buf));
-            crc = crc32 (crc, * reinterpret_cast<uint16_t const *> (buf + 4));
+            crc = i_crc32 (crc, * reinterpret_cast<uint32_t const *> (buf));
+            crc = i_crc32 (crc, * reinterpret_cast<uint16_t const *> (buf + 4));
             return crc;
 
         case 5:
-            crc = crc32 (crc, * buf); ++ buf;
+            crc = i_crc32 (crc, * buf); ++ buf;
             /* no break */
         case 4:
-            crc = crc32 (crc, * reinterpret_cast<uint32_t const *> (buf));
+            crc = i_crc32 (crc, * reinterpret_cast<uint32_t const *> (buf));
             return crc;
 
         case 3:
-            crc = crc32 (crc, * buf); ++ buf;
+            crc = i_crc32 (crc, * buf); ++ buf;
             /* no break */
         case 2:
-            crc = crc32 (crc, * reinterpret_cast<uint16_t const *> (buf));
+            crc = i_crc32 (crc, * reinterpret_cast<uint16_t const *> (buf));
             return crc;
 
         case 1:
-            crc = crc32 (crc, * buf);
+            crc = i_crc32 (crc, * buf);
             /* no break */
         default/* case 0 */: return crc;
 

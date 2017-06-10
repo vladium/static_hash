@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------
 
 #if !defined (VR_FORCE_INLINE)
-#   define VR_FORCE_INLINE      __attribute__((always_inline))
+#   define VR_FORCE_INLINE      inline __attribute__((always_inline))
 #endif
 
 #if !defined (VR_UNLIKELY)
