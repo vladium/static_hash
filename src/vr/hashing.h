@@ -28,7 +28,7 @@ constexpr uint32_t crc32_hash_seed ()     { return -1; }
  * @endcode
  */
 constexpr uint32_t
-operator "" _hash (char const * const str, size_t const len)
+operator "" _hash (char const * const str, std::size_t const len)
 {
     return crc32_constexpr (str, len, crc32_hash_seed ());
 }
