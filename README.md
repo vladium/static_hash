@@ -84,7 +84,7 @@ crc32_reference (uint8_t const * buf, int32_t len, uint32_t crc)
 Why use a CRC as a hash and, more interestingly, why use the iSCSI version of it? 
 
  1. because CRCs have mathematical properties that guarantee, with high probability, different values for runs of data
-    differing even in a single bit [2] -- this is one of the properties we'd want in a good hash function;
+    differing even in a single bit <sup name="a2">[2](#f2)</sup> -- this is one of the properties we'd want in a good hash function;
     
  2. because this particular CRC version is supported directly by hardware via the `crc32c` [SSE 4.2 instruction](https://en.wikipedia.org/wiki/X86_instruction_listings#Added_with_SSE4.2) for use, unsurprisingly, with iSCSI devices -- and that fact will be important to our faster runtime version;
     
@@ -147,7 +147,7 @@ and run times. Not too shabby.
 ## A fast(er) dynamic hash via SSE
 
 As mentioned above, CRC variant used by iSCSI is supported directly by modern CPUs via the `crc32c` instruction. It can
-consume data in chunks of up to 8 bytes, is reasonably fast, and pipelines well [3]. Something like the following
+consume data in chunks of up to 8 bytes, is reasonably fast, and pipelines well <sup name="a3">[3](#f3)</sup>. Something like the following
 would be dramatically faster than any hand-tuned version of `crc32_reference()`:
 
 ```cpp
@@ -216,15 +216,14 @@ and we can start `switch`ing on strings using the dynamic `str_hash()` in the co
 values in the `case` statements:
 
 ```cpp
-    uint32_t h;
-    switch (h = str_hash (av [1]))
+    switch (str_hash(av [1]))
     {
-        case "abcd"_hash:           std::cout << "abcd" << std::endl; break;
-        case "fgh"_hash:            std::cout << "fgh" << std::endl; break;
+        case "abcd"_hash:           std::cout << "abcd"        << std::endl; break;
+        case "fgh"_hash:            std::cout << "fgh"         << std::endl; break;
         case "abracadabra"_hash:    std::cout << "abracadabra" << std::endl; break;
     }
     
-    std::cout << '\'' << av [1] << "' hashed to 0x" << std::hex << h << std::endl;
+    std::cout << '\'' << av [1] << "' hashed to 0x" << std::hex << str_hash (av [1]) << std::endl;
 ```
 
 Looks like a nice and tidy `switch` statement to me!
@@ -291,10 +290,8 @@ So, the next step: a `constexpr` *perfect* hash, anyone? :)
 * I was inspired by a different, pre-C++11, solution for static string hashing in section 8.3 of Davide Di Gennaro's "Advanced C++ Metaprogramming".
 
 ---
-<b id="f1">1</b>: Technically, false negatives are still possible: they are extremely unlikely (a 32-bit hash collision) and in this use case the tokens are coming from a finite set, they are not arbitrary input strings.[↩](#a1)
+<b id="f1">[1]</b>: Technically, false negatives are still possible: they are extremely unlikely (a 32-bit hash collision) and in this use case the tokens are coming from a finite set, they are not arbitrary input strings.[↩](#a1)
 
-[2]: For example, a CRC based on a generator polynomial of degree *M* with a nonzero x<sup>0</sup> term will detect all
-possible bit changes in a consecuitive *M* bits of the input. 
+<b id="f2">[2]</b>: For example, a CRC based on a generator polynomial of degree *M* with a nonzero x<sup>0</sup> term will detect all possible bit changes in a consecuitive *M* bits of the input.[↩](#a2) 
 
-[3]: Agner Fog's instruction tables [http://www.agner.org/optimize/instruction_tables.pdf] for Haswell list `crc32c`
-latency at only 3 cycles, with the CPU able to pipeline one instruction immediately after another.
+<b id="f3">[3]</b>: Agner Fog's instruction tables [http://www.agner.org/optimize/instruction_tables.pdf] for Haswell list `crc32c` latency at only 3 cycles, with the CPU able to pipeline one instruction immediately after another.[↩](#a3)
