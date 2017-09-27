@@ -1,5 +1,5 @@
 
-# dynamic crc32 hash, meet static crc32 hash
+# Dynamic crc32 hash, meet static crc32 hash
 
 The classic pattern for parsing string tokens for values from a small set of choices goes something like this:
 
@@ -53,9 +53,9 @@ Syntactically, it is possible to engineer a single `hash()` function that will w
 and for the `case` values that must be *compile-time constants* in C++. However, I hope to make it clear below
 that in our particular use case this approach is neither optimal nor particularly convenient.
 
-Let's work through a practical solution in steps.
+Let's now work through a practical solution in steps.
 
-## a slow hash is "fast enough" when done at compile time
+## A slow hash is "fast enough" when done at compile time
 
 First, we start with a "slow" reference implementation of CRC32C as used by iSCSI protocol:
 
@@ -118,9 +118,9 @@ So, now expressions like `crc32_constexpr("hello", 5, -1)` will accumulate 5 byt
 
 Obviously, counting chars in a string literal to arrive at 5 like that isn't terribly convenient or error-proof. We
 can't just use `std::strlen()` either because that would ruin our `constexpr`-ness. Fortunately, another C++11
-feature solves the problem neatly.
+feature solves the problem neatly. In fact, it is scarily neat.
 
-## my kind of syntactic sugar: user-defined literals
+## My kind of syntactic sugar: user-defined literals
 
 A less well-known enhancement to the language brought about by C++11 standard is [*user-defined literals*](http://en.cppreference.com/w/cpp/language/user_literal).
 They can be used to define all sorts of nifty suffixes on numeric and string literals via custom operators of the
@@ -144,7 +144,7 @@ operator "" _hash (char const * str, std::size_t len)
 we will be able to say simply `"hello"_hash` and that expression will evaluate to our CRC hash value at both compile
 and run times. Not too shabby.
 
-## a fast dynamic hash via SSE
+## A fast(er) dynamic hash via SSE
 
 As mentioned above, CRC variant used by iSCSI is supported directly by modern CPUs via the `crc32c` instruction. It can
 consume data in chunks of up to 8 bytes, is reasonably fast, and pipelines well [3]. Something like the following
@@ -170,7 +170,7 @@ crc32 (uint8_t const * buf, int32_t len, uint32_t crc)
             crc = i_crc32 (crc, * reinterpret_cast<uint16_t const *> (buf + 4));
             return crc;
             
-        ...handle other remainder sizes... 
+        // ...handle other remainder sizes... 
     }
 }
 ```
@@ -184,7 +184,7 @@ that isn't necessary for string hashing/lookup as needed by my use case: you cou
 or use prefixes/suffixes of fixed max lengths, etc to gain more performance. Such improvements tend to be application-
 and data distribution-specific, however. My version is mildly hinted towards short strings to match my common use cases.  
 
-## almost there
+## Almost there
 
 All that remains is to add some overloaded wrappers for `crc32()` to accept strings in various forms that can be
 encountered in the wild:
@@ -227,9 +227,9 @@ values in the `case` statements:
     std::cout << '\'' << av [1] << "' hashed to 0x" << std::hex << h << std::endl;
 ```
 
-Looks like a `switch` statement to me!
+Looks like a nice and tidy `switch` statement to me!
 
-## build the demo
+### build the demo
 
 There are only 3 `.cpp` files in this demo repo. They are easy enough to build by hand if desired but you could also
 try the included `build.sh` script:
@@ -253,7 +253,7 @@ running test_crc32() ..., success: 1
 'test' hashed to 0x795f8d3f
 ```
 
-## recap: what have we gained, exactly?
+## Recap: what have we gained, exactly?
 
 A switch statement does not always guarantee O(1) dispatch cost: usually a compiler will use a jump table only if
 the `case` values fall into compact groups and ranges. Otherwise it will have to emit a series of comparisons followed
@@ -281,6 +281,14 @@ them are the bodies of `case` statements. The upshot is:
    corresponding memory load)
 
 So, the next step: a `constexpr` *perfect* hash, anyone? :)
+
+## Authors
+
+[Vlad Roubtsov](https://github.com/vladium)
+
+## Acknowledgments
+
+* I was inspired by a different, pre-C++11, solution for static string hashing in section 8.3 of Davide Di Gennaro's "Advanced C++ Metaprogramming".
 
 ---
 [1]: Technically, false negatives are still possible: they are extremely unlikely (a 32-bit hash collision) and in this use case the tokens are coming from a finite set, they are not arbitrary input strings.
