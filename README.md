@@ -47,7 +47,7 @@ switch (hash(tok))
 
 Not only does this look more maintainable, there is a good chance we can pick up some performance if we end up saving
 on long string comparisons. (Note that if `hash()` produces duplicates the switch won't compile, so we're safe against
-[false negatives][1]. And since `hash("abcd")` doesn't change at runtime we should be able to save even more by pre-computing it.
+false negatives [1]. And since `hash("abcd")` doesn't change at runtime we should be able to save even more by pre-computing it.
 
 Syntactically, it is possible to engineer a single `hash()` function that will work both for runtime inputs like `tok`
 and for the `case` values that must be *compile-time constants* in C++. However, I hope to make it clear below
@@ -84,7 +84,7 @@ crc32_reference (uint8_t const * buf, int32_t len, uint32_t crc)
 Why use a CRC as a hash and, more interestingly, why use the iSCSI version of it? 
 
  1. because CRCs have mathematical properties that guarantee, with high probability, different values for runs of data
-    differing even in a [single bit][2] -- this is one of the properties we'd want in a good hash function;
+    differing even in a single bit [2] -- this is one of the properties we'd want in a good hash function;
     
  2. because this particular CRC version is supported directly by hardware via the `crc32c` [SSE 4.2 instruction](https://en.wikipedia.org/wiki/X86_instruction_listings#Added_with_SSE4.2) for use, unsurprisingly, with iSCSI devices -- and that fact will be important to our faster runtime version;
     
@@ -147,7 +147,7 @@ and run times. Not too shabby.
 ## a fast dynamic hash via SSE
 
 As mentioned above, CRC variant used by iSCSI is supported directly by modern CPUs via the `crc32c` instruction. It can
-consume data in chunks of up to 8 bytes, is [reasonably fast, and pipelines well][3]. Something like the following
+consume data in chunks of up to 8 bytes, is reasonably fast, and pipelines well [3]. Something like the following
 would be dramatically faster than any hand-tuned version of `crc32_reference()`:
 
 ```cpp
@@ -227,7 +227,7 @@ values in the `case` statements:
     std::cout << '\'' << av [1] << "' hashed to 0x" << std::hex << h << std::endl;
 ```
 
-Looks pretty maintainable to me!
+Looks like a `switch` statement to me!
 
 ## build the demo
 
@@ -283,8 +283,7 @@ them are the bodies of `case` statements. The upshot is:
 So, the next step: a `constexpr` *perfect* hash, anyone? :)
 
 ---
-[1]: Technically, false negatives are still possible: they are extremely unlikely (a 32-bit hash collision) and in 
-this use case the tokens are coming from a finite set, they are not arbitrary input strings. 
+[1]: Technically, false negatives are still possible: they are extremely unlikely (a 32-bit hash collision) and in this use case the tokens are coming from a finite set, they are not arbitrary input strings.
 
 [2]: For example, a CRC based on a generator polynomial of degree *M* with a nonzero x<sup>0</sup> term will detect all
 possible bit changes in a consecuitive *M* bits of the input. 
