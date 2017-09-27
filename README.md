@@ -127,14 +127,14 @@ They can be used to define all sorts of nifty suffixes on numeric and string lit
 form `operator "" _SOMETHING` (invoked in response to tokens like `10_SOMETHING`) *and* they are allowed to
 be `constexpr`. One of the allowed signatures for a *string* literal operator is
 
-```
+```cpp
 ( const char *, std::size_t )
 ```
 where the compiler will provide the `std::strlen()`-like string length, i.e. excluding the null terminator.
 
 Long story short, if we define
 
-```
+```cpp
 constexpr uint32_t
 operator "" _hash (char const * str, std::size_t len)
 {
@@ -264,7 +264,7 @@ hash function is to "randomize" the output). Here is an asm extract from the `ma
 demo above:
 
 ```asm
-   0x0000000000400d15 <+85>:   je     0x400dea <main(int32_t, char**)+298>
+   0x0000000000400d15 <+85>:    je     0x400dea <main(int32_t, char**)+298>
    0x0000000000400d1b <+91>:    jbe    0x400e93 <main(int32_t, char**)+467>
    0x0000000000400d21 <+97>:    cmp    $0x79e5f6b1,%ebx
    0x0000000000400d27 <+103>:   je     0x400e43 <main(int32_t, char**)+387>
@@ -283,7 +283,7 @@ So, the next step: a `constexpr` *perfect* hash, anyone? :)
 
 ## Authors
 
-[Vlad Roubtsov](https://github.com/vladium), 2017
+* [Vlad Roubtsov](https://github.com/vladium), 2017
 
 ## Acknowledgments
 
