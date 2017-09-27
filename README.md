@@ -144,7 +144,7 @@ operator "" _hash (char const * str, std::size_t len)
 we will be able to say simply `"hello"_hash` and that expression will evaluate to our CRC hash value at both compile
 and run times. Not too shabby.
 
-## A fast(er) dynamic hash via SSE
+## A fast dynamic hash via SSE
 
 As mentioned above, CRC variant used by iSCSI is supported directly by modern CPUs via the `crc32c` instruction. It can
 consume data in chunks of up to 8 bytes, is reasonably fast, and pipelines well <sup name="a3">[3](#f3)</sup>. Something like the following
