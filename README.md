@@ -47,7 +47,7 @@ switch (hash(tok))
 
 Not only does this look more maintainable, there is a good chance we can pick up some performance if we end up saving
 on long string comparisons. (Note that if `hash()` produces duplicates the switch won't compile, so we're safe against
-false negatives [1]. And since `hash("abcd")` doesn't change at runtime we should be able to save even more by pre-computing it.
+false negatives <sup name="a1">[1](#f1)</sup>. And since `hash("abcd")` doesn't change at runtime we should be able to save even more by pre-computing it.
 
 Syntactically, it is possible to engineer a single `hash()` function that will work both for runtime inputs like `tok`
 and for the `case` values that must be *compile-time constants* in C++. However, I hope to make it clear below
@@ -284,14 +284,14 @@ So, the next step: a `constexpr` *perfect* hash, anyone? :)
 
 ## Authors
 
-[Vlad Roubtsov](https://github.com/vladium)
+[Vlad Roubtsov](https://github.com/vladium), 2017
 
 ## Acknowledgments
 
 * I was inspired by a different, pre-C++11, solution for static string hashing in section 8.3 of Davide Di Gennaro's "Advanced C++ Metaprogramming".
 
 ---
-[1]: Technically, false negatives are still possible: they are extremely unlikely (a 32-bit hash collision) and in this use case the tokens are coming from a finite set, they are not arbitrary input strings.
+<b id="f1">1</b>: Technically, false negatives are still possible: they are extremely unlikely (a 32-bit hash collision) and in this use case the tokens are coming from a finite set, they are not arbitrary input strings.[↩](#a1)
 
 [2]: For example, a CRC based on a generator polynomial of degree *M* with a nonzero x<sup>0</sup> term will detect all
 possible bit changes in a consecuitive *M* bits of the input. 
